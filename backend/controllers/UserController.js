@@ -43,34 +43,37 @@ const register = async (req, res) => {
   res.status(201).json({ _id: newUser._id, token: generateToken(newUser._id) });
 };
 
-
 //login do usuario
-const login = async (req,res) => {
+const login = async (req, res) => {
+  const { email, password } = req.body;
 
-  const {email,password} = req.body;
+  const user = await User.findOne({ email });
 
-  const user = await User.findOne({email});
-
-  if(!user){
-    res.status(404).json({errors:["Usuário não encontrado."]})
-    return
+  if (!user) {
+    res.status(404).json({ errors: ["Usuário não encontrado."] });
+    return;
   }
 
   //check if password matches
-  if(!(await bcrypt.compare(password, user.password))){
-    res.status(422).json({errors:["A senha está errada."]})
-    return
+  if (!(await bcrypt.compare(password, user.password))) {
+    res.status(422).json({ errors: ["A senha está errada."] });
+    return;
   }
 
   //retorn usuário com token
   res.status(201).json({
-    _id:user._id,
+    _id: user._id,
     profileImage: user.profileImage,
-    token:generateToken(user._id)
-  })
+    token: generateToken(user._id),
+  });
+};
 
+//recuperar usuário logado
+const getCurrentUser = async(req, res) => {
+  const user = req.user;
 
-   
-}
+  res.status(200).json(user)
 
-module.exports = { register, login };
+};
+
+module.exports = { register, login, getCurrentUser };
