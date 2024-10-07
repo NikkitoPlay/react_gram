@@ -2,6 +2,7 @@ const User = require("../models/User");
 
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { default: mongoose } = require("mongoose");
 
 const jwtSecret = process.env.JWT_SECRET;
 
@@ -69,11 +70,45 @@ const login = async (req, res) => {
 };
 
 //recuperar usuário logado
-const getCurrentUser = async(req, res) => {
+const getCurrentUser = async (req, res) => {
   const user = req.user;
 
-  res.status(200).json(user)
-
+  res.status(200).json(user);
 };
 
-module.exports = { register, login, getCurrentUser };
+const update = async (req, res) => {
+  const { name, password, bio } = req.body;
+  let profileImage = null;
+
+  if (req.file) {
+    profileImage = req.file.filename;
+  }
+
+  const user = await User.findById(mongoose.Types.ObjectId(req.user._id));
+
+  if (name) {
+    user.name = name;
+  }
+
+  if (password) {
+    // generate password hash
+    const salt = await bcrypt.genSalt();
+    const passwordHash = await bcrypt.hash(password, salt);
+
+    user.password = passwordHash;
+  }
+
+  if (profileImage) {
+    user.profileImage = profileImage;
+  }
+
+  if (bio) {
+    user.bio = bio;
+  }
+
+  await user.save();
+
+  res.status(200).json(user)
+};
+
+module.exports = { register, login, getCurrentUser, update };
