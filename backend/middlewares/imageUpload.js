@@ -12,7 +12,7 @@ const imageStorage = multer.diskStorage({
       folder = "photos";
     }
 
-    cb(null, `/uploads/${folder}/`);
+    cb(null, `./uploads/${folder}/`);
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));

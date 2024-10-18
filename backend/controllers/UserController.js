@@ -2,7 +2,7 @@ const User = require("../models/User");
 
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const mongoose  = require("mongoose");
+const mongoose = require("mongoose");
 
 const jwtSecret = process.env.JWT_SECRET;
 
@@ -84,7 +84,7 @@ const update = async (req, res) => {
     profileImage = req.file.filename;
   }
 
-  const user = await User.findById( new mongoose.Types.ObjectId(req.user._id));
+  const user = await User.findById(new mongoose.Types.ObjectId(req.user._id));
 
   if (name) {
     user.name = name;
@@ -108,7 +108,26 @@ const update = async (req, res) => {
 
   await user.save();
 
-  res.status(200).json(user)
+  res.status(200).json(user);
 };
 
-module.exports = { register, login, getCurrentUser, update };
+//get user by id
+const getUserById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const user = await User.findById(id).select("-password");
+
+    if (!user) {
+      res.status(404).json({ erros: ["Usuário não encontrado."] });
+      return;
+    }
+    
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(404).json({ erros: ["Usuário não encontrado. 1"] });
+    return;
+  }
+};
+
+module.exports = { register, login, getCurrentUser, update, getUserById };
