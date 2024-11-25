@@ -65,18 +65,72 @@ const deletePhoto = async (req, res) => {
 };
 
 //pegar todas as fotos
-const getAllPhotos = async(req,res) =>{
-  const photos = await Photo.find({}).sort([['createdAt', -1]]).exec()
+const getAllPhotos = async (req, res) => {
+  const photos = await Photo.find({})
+    .sort([["createdAt", -1]])
+    .exec();
   return res.status(200).json(photos);
-  
-}
+};
 
-const getUserPhotos = (req,res)=> {
-  const {id} = req.params
-}
+//pegar fotos de um usuario
+const getUserPhotos = async (req, res) => {
+  const { id } = req.params;
+
+  const photos = await Photo.find({ userId: id })
+    .sort([["createdAt", -1]])
+    .exec();
+
+  return res.status(200).json(photos);
+};
+
+//pegar fotos por id
+const getPhotosById = async (req, res) => {
+  const { id } = req.params;
+
+  const photo = await Photo.findById(new mongoose.Types.ObjectId(id));
+
+  //verifica se foto existe
+  if (!photo) {
+    res.status(404).json({ errors: ["Foto não encontrada."] });
+    return;
+  }
+
+  return res.status(200).json(photo);
+};
+
+//atualizar uma foto
+const updatePhoto = async (req, res) => {
+  const { id } = req.params;
+  const { title } = req.body;
+  const reqUser = req.user;
+
+  let photo = await Photo.findById(id);
+
+  //verifica se foto existe
+  if (!photo) {
+    return res.status(404).json({ errors: ["Foto não encontrada!"] });
+  }
+
+  //verifica se foto pertence ao usuario
+  if (!photo.userId.equals(reqUser._id)) {
+    return res
+      .status(422)
+      .json({ errors: ["Houve um erro, tente mais tarde!"] });
+  }
+
+  if(title){
+    photo.title = title;
+  }
+
+  await photo.save();
+  return res.status(200).json({photo, message:"Foto atualizada com sucesso!"})
+};
 
 module.exports = {
   insertPhoto,
   deletePhoto,
-  getAllPhotos
+  getAllPhotos,
+  getUserPhotos,
+  getPhotosById,
+  updatePhoto
 };
