@@ -147,12 +147,47 @@ const likePhoto = async (req, res) => {
 
   //colocar id usuario no array de likes
   photo.likes.push(reqUser._id);
-  photo.save();
+  await photo.save();
 
   res
     .status(200)
     .json({ photoId: id, userId: reqUser._id, message: "A foto foi curtida!" });
 };
+
+//funcionalidade de comentar
+const commentPhoto = async(req, res) => {
+  const {id} = req.params;
+  const {comment} = req.body;
+  const reqUser = req.user;
+
+  const user = await User.findById(reqUser._id);
+
+  const photo = await Photo.findById(id);
+
+  //verifica se foto existe
+  if (!photo) {
+    return res.status(404).json({ errors: ["Foto não encontrada!"] });
+  }
+
+  //coloca o comentario no array 
+  const userComment = {
+    comment,
+    userName: user.name,
+    userImage: user.profileImage,
+    userId: user._id
+  }
+
+  photo.comments.push(userComment)
+  await photo.save();
+
+
+  res.status(200).json({
+    comment: userComment,
+    message: 'O comentário foi adicionado com sucesso.'
+  })
+}
+
+//busca imagens pelo titulo
 
 module.exports = {
   insertPhoto,
@@ -161,5 +196,6 @@ module.exports = {
   getUserPhotos,
   getPhotosById,
   updatePhoto,
-  likePhoto
+  likePhoto,
+  commentPhoto
 };
