@@ -6,3 +6,34 @@ body{
   background-color: #121212;
   color: #fafafa;
 }
+
+a {
+  color: #fafafa;
+  text-decoration: none;
+}
+
+.active{
+  font-weight: bold;
+}
+
+ul{
+  list-style: none;
+}
+
+form{
+  display: flex;
+  flex-direction: column;
+}
+
+label{
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+label span{
+  font-weight: bold;
+  margin-bottom: .5em;
+  color: #aaa;
+  font-size: .7em;
+}
